@@ -50,17 +50,19 @@
             width: 100%;
             margin: 0 auto;
             padding-bottom: 10px;
+            flex-grow: 1; /* Allow it to grow to fill available space */
         }
 
         .video-player video {
             width: 100%;
-            height: auto;
+            height: 100%; /* Fill container height */
+            object-fit: fill; /* Default to fill, overridden by JavaScript */
         }
 
         .plyr {
             border-radius: 5px;
             width: 100%;
-            height: auto;
+            height: 100%;
         }
 
         ::-webkit-scrollbar {
@@ -141,11 +143,12 @@
                 Aspect Ratio
             </button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" onclick="setRatio('16:9')">16:9</a></li>
-                <li><a class="dropdown-item" href="#" onclick="setRatio('4:3')">4:3</a></li>
-                <li><a class="dropdown-item" href="#" onclick="setRatio('21:9')">21:9</a></li>
-                <li><a class="dropdown-item" href="#" onclick="setRatio('1:1')">1:1</a></li>
-                <li><a class="dropdown-item" href="#" onclick="setRatio('default')">Original</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('16:9', 'fill')">16:9</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('4:3', 'fill')">4:3</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('21:9', 'fill')">21:9</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('1:1', 'fill')">1:1</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('default', 'contain')">Original</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('fit', 'cover')">Fit Screen</a></li>
             </ul>
         </div>
     </div>
@@ -239,8 +242,9 @@
         videoElement.src = newSrc;
     }
 
-    function setRatio(ratio) {
+    function setRatio(ratio, fitMode) {
         if (player) {
+            const videoElement = player.media;
             switch (ratio) {
                 case '16:9':
                     player.ratio = '16:9';
@@ -257,7 +261,24 @@
                 case 'default':
                     player.ratio = null; // Reset to original
                     break;
+                case 'fit':
+                    player.ratio = null; // Use native ratio
+                    break;
             }
+
+            // Apply object-fit based on fitMode
+            switch (fitMode) {
+                case 'fill':
+                    videoElement.style.objectFit = 'fill'; // Stretch to fill, distorting if needed
+                    break;
+                case 'contain':
+                    videoElement.style.objectFit = 'contain'; // Fit within bounds, may show bars
+                    break;
+                case 'cover':
+                    videoElement.style.objectFit = 'cover'; // Fill by cropping
+                    break;
+            }
+
             player.play(); // Resume playback
         }
     }
