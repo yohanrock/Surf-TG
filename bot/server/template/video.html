@@ -17,20 +17,17 @@
         body {
             height: 100vh;
             margin: 0;
-            display: flex;
-            flex-direction: column;
             justify-content: center;
-            align-items: stretch;
+            align-items: center;
         }
 
         .container {
-            margin: 0 auto;
-            padding: 0;
-            width: 100%;
+            margin: auto;
+            padding: 0px;
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            align-items: flex-start;
             gap: 10px;
         }
 
@@ -46,23 +43,19 @@
         }
 
         .video-player {
-            max-width: 100%;
-            width: 100%;
-            margin: 0 auto;
+            max-width: 48%; /* Revert to original size */
+            margin: auto;
             padding-bottom: 10px;
-            flex-grow: 1; /* Allow it to grow to fill available space */
-        }
-
-        .video-player video {
-            width: 100%;
-            height: 100%; /* Fill container height */
-            object-fit: fill; /* Default to fill, overridden by JavaScript */
         }
 
         .plyr {
             border-radius: 5px;
+        }
+
+        .video-player video {
             width: 100%;
-            height: 100%;
+            height: 100%; /* Fill the container height */
+            object-fit: fill; /* Default fit mode, overridden by JavaScript */
         }
 
         ::-webkit-scrollbar {
@@ -79,9 +72,8 @@
 
         @media (max-width: 992px) {
             .video-player {
-                max-width: 100%;
-                width: 100%;
-                margin: 0 auto;
+                max-width: 80%; /* Revert to original mobile size */
+                margin: auto;
             }
 
             .card {
@@ -148,7 +140,7 @@
                 <li><a class="dropdown-item" href="#" onclick="setRatio('21:9', 'fill')">21:9</a></li>
                 <li><a class="dropdown-item" href="#" onclick="setRatio('1:1', 'fill')">1:1</a></li>
                 <li><a class="dropdown-item" href="#" onclick="setRatio('default', 'contain')">Original</a></li>
-                <li><a class="dropdown-item" href="#" onclick="setRatio('fit', 'cover')">Fit Screen</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('fit', 'cover')">Fit Container</a></li>
             </ul>
         </div>
     </div>
@@ -262,11 +254,11 @@
                     player.ratio = null; // Reset to original
                     break;
                 case 'fit':
-                    player.ratio = null; // Use native ratio
+                    player.ratio = null; // Use native ratio but fill container
                     break;
             }
 
-            // Apply object-fit based on fitMode
+            // Apply object-fit to control how the video fits within the fixed container
             switch (fitMode) {
                 case 'fill':
                     videoElement.style.objectFit = 'fill'; // Stretch to fill, distorting if needed
