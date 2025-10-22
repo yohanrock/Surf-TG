@@ -1,3 +1,4 @@
+import asyncio
 from asyncio import get_event_loop, sleep as asleep, gather
 from traceback import format_exc
 
@@ -10,7 +11,9 @@ from bot.server import web_server
 from bot.telegram import StreamBot, UserBot
 from bot.telegram.clients import initialize_clients
 
-loop = get_event_loop()
+# Ensure an event loop is set to avoid issues with Pyrogram's sync wrappers
+loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 async def start_services():
     LOGGER.info(f'Initializing Surf-TG v-{__version__}')
@@ -29,16 +32,16 @@ async def start_services():
     await initialize_clients()
     
     await asleep(2)
-    LOGGER.info('Initalizing Surf Web Server..')
-    server = web.AppRunner(await web_server())
-    LOGGER.info("Server CleanUp!")
-    await server.cleanup()
+    LOGGER.info('Initializing Surf Web Server..')
+    server = await web_server()
+    app_runner = web.AppRunner(server)
+    await app_runner.setup()
     
     await asleep(2)
     LOGGER.info("Server Setup Started !")
     
-    await server.setup()
-    await web.TCPSite(server, '0.0.0.0', Telegram.PORT).start()
+    site = web.TCPSite(app_runner, '0.0.0.0', Telegram.PORT)
+    await site.start()
 
     LOGGER.info("Surf-TG Started Revolving !")
     await idle()
@@ -47,7 +50,6 @@ async def stop_clients():
     await StreamBot.stop()
     if len(Telegram.SESSION_STRING) != 0:
         await UserBot.stop()
-
 
 if __name__ == '__main__':
     try:
@@ -59,3 +61,4 @@ if __name__ == '__main__':
     finally:
         loop.run_until_complete(stop_clients())
         loop.stop()
+        loop.close()
