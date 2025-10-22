@@ -453,7 +453,7 @@ async def media_streamer(request: web.Request, chat_id: int, id: int, secure_has
             "Content-Type": f"{mime_type}",
             "Content-Range": f"bytes {from_bytes}-{until_bytes}/{file_size}",
             "Content-Length": str(req_length),
-            "Content-Disposition": f'{disposition}; filename="{file_name}"',
+            "Content-Disposition": f'inline; filename="{file_name}"',
             "Accept-Ranges": "bytes",
         },
     )
