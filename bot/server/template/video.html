@@ -43,7 +43,7 @@
         }
 
         .video-player {
-            max-width: 48%; /* Fixed container size */
+            max-width: 48%; /* Revert to original size */
             margin: auto;
             padding-bottom: 10px;
         }
@@ -72,7 +72,7 @@
 
         @media (max-width: 992px) {
             .video-player {
-                max-width: 80%; /* Fixed mobile size */
+                max-width: 80%; /* Revert to original mobile size */
                 margin: auto;
             }
 
@@ -190,39 +190,9 @@
     }
 
     function vlc_player() {
-        const fullUrl = downloadlink; // e.g., https://web-production-c6704.up.railway.app/stream/...?id=...&hash=...
-
-        // Detect platform
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        const isWindows = /Windows NT/i.test(navigator.userAgent);
-
-        let vlcScheme;
-
-        if (isAndroid) {
-            // Android: Use intent with full URL to target VLC
-            vlcScheme = `intent://${fullUrl}#Intent;package=org.videolan.vlc;type=video/*;end`;
-        } else if (isWindows) {
-            // Windows: Use custom vlcproto:// (requires setup; falls back to new tab if handler not registered)
-            vlcScheme = `vlcproto://${fullUrl}`;
-        } else {
-            // Other platforms: Fallback to opening in new tab or prompt
-            alert('VLC support is best on Android/Windows. Opening in new tab...');
-            window.open(fullUrl, '_blank');
-            return;
-        }
-
-        // Try to open VLC; handle intent failure
-        const originalLocation = window.location.href;
-        window.location.href = vlcScheme;
-
-        // Check if the intent failed (still on the same page after 500ms)
-        setTimeout(() => {
-            if (window.location.href === originalLocation) {
-                console.error('VLC intent failed, falling back to new tab');
-                alert('VLC not opened. Please install VLC or open the stream manually.');
-                window.open(fullUrl, '_blank');
-            }
-        }, 500);
+        const openDownloadLink = downloadlink.replace(/^https?:?\/\/*/, '');
+        const openVlc = `vlc://${openDownloadLink}`;
+        window.location.href = openVlc;
     }
 
     function km_player() {
