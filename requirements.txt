@@ -2,7 +2,8 @@ aiofiles
 aiohttp
 aiohttp_session
 cryptography
-pyrogram
+pyrofork
 python-dotenv
 tgcrypto
+uvloop==0.22.0
 pymongo
