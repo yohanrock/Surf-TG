@@ -190,7 +190,7 @@
     }
 
     function vlc_player() {
-        const fullUrl = downloadlink; // Use full URL (e.g., https://web.example.com/stream/...?id=...&hash=...)
+        const fullUrl = downloadlink; // e.g., https://web-production-c6704.up.railway.app/stream/...?id=...&hash=...
 
         // Detect platform
         const isAndroid = /Android/i.test(navigator.userAgent);
@@ -199,25 +199,30 @@
         let vlcScheme;
 
         if (isAndroid) {
-            // Android: Use vlc:// with full URL
-            vlcScheme = `vlc://${fullUrl}`;
+            // Android: Use intent with full URL to target VLC
+            vlcScheme = `intent://${fullUrl}#Intent;package=org.videolan.vlc;type=video/*;end`;
         } else if (isWindows) {
             // Windows: Use custom vlcproto:// (requires setup; falls back to new tab if handler not registered)
             vlcScheme = `vlcproto://${fullUrl}`;
         } else {
-            // Other platforms (macOS, Linux, iOS): Fallback to opening in new tab or prompt
+            // Other platforms: Fallback to opening in new tab or prompt
             alert('VLC support is best on Android/Windows. Opening in new tab...');
             window.open(fullUrl, '_blank');
             return;
         }
 
-        // Try to open VLC; fallback to new tab if scheme fails (e.g., VLC not installed)
-        try {
-            window.location.href = vlcScheme;
-        } catch (e) {
-            console.error('VLC scheme failed, falling back to new tab:', e);
-            window.open(fullUrl, '_blank');
-        }
+        // Try to open VLC; handle intent failure
+        const originalLocation = window.location.href;
+        window.location.href = vlcScheme;
+
+        // Check if the intent failed (still on the same page after 500ms)
+        setTimeout(() => {
+            if (window.location.href === originalLocation) {
+                console.error('VLC intent failed, falling back to new tab');
+                alert('VLC not opened. Please install VLC or open the stream manually.');
+                window.open(fullUrl, '_blank');
+            }
+        }, 500);
     }
 
     function km_player() {
