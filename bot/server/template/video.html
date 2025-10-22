@@ -17,18 +17,20 @@
         body {
             height: 100vh;
             margin: 0;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
-            align-items: center;
-
+            align-items: stretch;
         }
 
         .container {
-            margin: auto;
-            padding: 0px;
+            margin: 0 auto;
+            padding: 0;
+            width: 100%;
             display: flex;
             flex-wrap: wrap;
-            justify-content: flex-start;
-            align-items: flex-start;
+            justify-content: center;
+            align-items: center;
             gap: 10px;
         }
 
@@ -44,13 +46,21 @@
         }
 
         .video-player {
-            max-width: 48%;
-            margin: auto;
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
             padding-bottom: 10px;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: auto;
         }
 
         .plyr {
             border-radius: 5px;
+            width: 100%;
+            height: auto;
         }
 
         ::-webkit-scrollbar {
@@ -66,10 +76,10 @@
         }
 
         @media (max-width: 992px) {
-
             .video-player {
-                max-width: 80%;
-                margin: auto;
+                max-width: 100%;
+                width: 100%;
+                margin: 0 auto;
             }
 
             .card {
@@ -83,6 +93,10 @@
                 padding-right: 15px;
                 padding-left: 15px;
             }
+        }
+
+        .ratio-dropdown {
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -100,7 +114,6 @@
                         Logout</button>
                 </form>
             </div>
-
         </div>
     </nav>
     <div class="video-player">
@@ -116,11 +129,25 @@
     </div>
     <div class="container d-flex justify-content-center align-items-center" style="width: 100%; padding: 0 5px;">
         <div onclick="mx_player()" class="btn btn-primary">MX Player</div>
+        <div onclick="mx_player_pro()" class="btn btn-primary">MX Player Pro</div>
         <div onclick="vlc_player()" class="btn btn-primary">VLC Mobile</div>
         <div onclick="km_player()" class="btn btn-primary">KM Player</div>
         <div onclick="get_file()" class="btn btn-primary">Get File</div>
         <div onclick="copyUrl()" class="btn btn-primary">Copy Url</div>
         <div onclick="download()" class="btn btn-primary">Download</div>
+
+        <div class="btn-group ratio-dropdown">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Aspect Ratio
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="setRatio('16:9')">16:9</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('4:3')">4:3</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('21:9')">21:9</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('1:1')">1:1</a></li>
+                <li><a class="dropdown-item" href="#" onclick="setRatio('default')">Original</a></li>
+            </ul>
+        </div>
     </div>
     <footer class="footer mt-auto py-3 text-muted text-center" style="color: white;">
         <div class="container d-flex justify-content-center align-items-center" style="width: 100%; padding: 0 10px;">
@@ -135,6 +162,7 @@
         </div>
     </footer>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const videolink = window.location.href;
     const url = new URL(videolink);
@@ -153,10 +181,17 @@
         keyboard: { focused: true, global: true },
         loop: { active: false },
     });
+
     function mx_player() {
         const openDownloadLink = downloadlink;
         const openMx = `intent:${openDownloadLink}#Intent;package=com.mxtech.videoplayer.ad;end`;
         window.location.href = openMx;
+    }
+
+    function mx_player_pro() {
+        const openDownloadLink = downloadlink;
+        const openMxPro = `intent:${openDownloadLink}#Intent;package=com.mxtech.videoplayer.pro;end`;
+        window.location.href = openMxPro;
     }
 
     function vlc_player() {
@@ -164,15 +199,18 @@
         const openVlc = `vlc://${openDownloadLink}`;
         window.location.href = openVlc;
     }
+
     function km_player() {
         const openDownloadLink = downloadlink;
         const openKmplayer = `intent:${openDownloadLink}#Intent;package=com.kmplayer;end`;
         window.location.href = openKmplayer;
     }
+
     function download() {
         const openDownloadLink = downloadlink;
         window.location.href = openDownloadLink;
     }
+
     function get_file() {
         const regex = /(\d+)\?id=(\d+)&/;
         const match = videolink.match(regex);
@@ -183,6 +221,7 @@
             window.location.href = openTG;
         }
     }
+
     function copyUrl() {
         const url = downloadlink;
         navigator.clipboard.writeText(url)
@@ -193,11 +232,36 @@
                 console.error('Failed to copy URL: ', error);
             });
     }
+
     function updateVideoSource() {
         const videoElement = document.getElementById('player');
         const newSrc = downloadlink;
         videoElement.src = newSrc;
     }
+
+    function setRatio(ratio) {
+        if (player) {
+            switch (ratio) {
+                case '16:9':
+                    player.ratio = '16:9';
+                    break;
+                case '4:3':
+                    player.ratio = '4:3';
+                    break;
+                case '21:9':
+                    player.ratio = '21:9';
+                    break;
+                case '1:1':
+                    player.ratio = '1:1';
+                    break;
+                case 'default':
+                    player.ratio = null; // Reset to original
+                    break;
+            }
+            player.play(); // Resume playback
+        }
+    }
+
     window.onload = function () {
         updateVideoSource();
     };
