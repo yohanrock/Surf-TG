@@ -43,7 +43,7 @@
         }
 
         .video-player {
-            max-width: 48%; /* Revert to original size */
+            max-width: 48%; /* Fixed container size */
             margin: auto;
             padding-bottom: 10px;
         }
@@ -72,7 +72,7 @@
 
         @media (max-width: 992px) {
             .video-player {
-                max-width: 80%; /* Revert to original mobile size */
+                max-width: 80%; /* Fixed mobile size */
                 margin: auto;
             }
 
@@ -190,9 +190,34 @@
     }
 
     function vlc_player() {
-        const openDownloadLink = downloadlink;
-        const openVlc = `vlc://${openDownloadLink}`;
-        window.location.href = openVlc;
+        const fullUrl = downloadlink; // Use full URL (e.g., https://web.example.com/stream/...?id=...&hash=...)
+
+        // Detect platform
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isWindows = /Windows NT/i.test(navigator.userAgent);
+
+        let vlcScheme;
+
+        if (isAndroid) {
+            // Android: Use vlc:// with full URL
+            vlcScheme = `vlc://${fullUrl}`;
+        } else if (isWindows) {
+            // Windows: Use custom vlcproto:// (requires setup; falls back to new tab if handler not registered)
+            vlcScheme = `vlcproto://${fullUrl}`;
+        } else {
+            // Other platforms (macOS, Linux, iOS): Fallback to opening in new tab or prompt
+            alert('VLC support is best on Android/Windows. Opening in new tab...');
+            window.open(fullUrl, '_blank');
+            return;
+        }
+
+        // Try to open VLC; fallback to new tab if scheme fails (e.g., VLC not installed)
+        try {
+            window.location.href = vlcScheme;
+        } catch (e) {
+            console.error('VLC scheme failed, falling back to new tab:', e);
+            window.open(fullUrl, '_blank');
+        }
     }
 
     function km_player() {
