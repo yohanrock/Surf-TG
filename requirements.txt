@@ -2,8 +2,7 @@ aiofiles
 aiohttp
 aiohttp_session
 cryptography
-pyrofork
+pyrogram
 python-dotenv
 tgcrypto
-uvloop
 pymongo
